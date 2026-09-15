@@ -1,0 +1,20 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "paths": {
+      "@fairgo/shared-types": ["../../packages/shared-types/src/index.ts"],
+      "@fairgo/logger": ["../../packages/logger/src/index.ts"],
+      "@fairgo/domain-errors": ["../../packages/domain-errors/src/index.ts"],
+      "@fairgo/event-contracts": ["../../packages/event-contracts/src/index.ts"]
+    }
+  },
+  "include": ["src/**/*"],
+  "references": [
+    { "path": "../../packages/shared-types" },
+    { "path": "../../packages/logger" },
+    { "path": "../../packages/domain-errors" },
+    { "path": "../../packages/event-contracts" }
+  ]
+}

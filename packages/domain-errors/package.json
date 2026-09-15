@@ -1,0 +1,22 @@
+{
+  "name": "@fairgo/domain-errors",
+  "version": "0.1.0",
+  "description": "Domain error taxonomy for FairGo platform",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist *.tsbuildinfo"
+  },
+  "devDependencies": {
+    "rimraf": "^6.0.0",
+    "typescript": "^5.5.0"
+  }
+}

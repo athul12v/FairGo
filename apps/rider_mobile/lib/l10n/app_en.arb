@@ -1,0 +1,108 @@
+{
+  "@@locale": "en",
+  "appName": "FairGo Rider",
+  "@appName": { "description": "The name of the application" },
+
+  "onboarding1Title": "Go anywhere, anytime",
+  "@onboarding1Title": { "description": "First onboarding page title" },
+
+  "onboarding1Subtitle": "Cabs, autos, bikes — pick your ride and we'll get you there safely.",
+  "@onboarding1Subtitle": {},
+
+  "onboarding2Title": "Send parcels instantly",
+  "@onboarding2Title": {},
+
+  "onboarding2Subtitle": "Same-day delivery for documents, packages and anything that fits.",
+  "@onboarding2Subtitle": {},
+
+  "onboarding3Title": "Hire a driver for the day",
+  "@onboarding3Title": {},
+
+  "onboarding3Subtitle": "Your car, a professional driver. Hourly or full-day bookings.",
+  "@onboarding3Subtitle": {},
+
+  "onboarding4Title": "Safe every trip",
+  "@onboarding4Title": {},
+
+  "onboarding4Subtitle": "SOS button, live trip sharing, and emergency contacts built in.",
+  "@onboarding4Subtitle": {},
+
+  "skip": "Skip",
+  "@skip": {},
+
+  "next": "Next",
+  "@next": {},
+
+  "getStarted": "Get Started",
+  "@getStarted": {},
+
+  "enterMobileNumber": "Enter your mobile number",
+  "@enterMobileNumber": {},
+
+  "weWillSendOtp": "We'll send you a verification code",
+  "@weWillSendOtp": {},
+
+  "getOtp": "Get OTP",
+  "@getOtp": {},
+
+  "termsAndPrivacy": "By continuing, you agree to our\nTerms of Service & Privacy Policy",
+  "@termsAndPrivacy": {},
+
+  "verifyNumber": "Verify your number",
+  "@verifyNumber": {},
+
+  "codeSentTo": "Code sent to {phone}",
+  "@codeSentTo": {
+    "placeholders": { "phone": { "type": "String" } }
+  },
+
+  "verify": "Verify",
+  "@verify": {},
+
+  "resendCode": "Resend OTP",
+  "@resendCode": {},
+
+  "resendIn": "Resend code in 0:{seconds}",
+  "@resendIn": {
+    "placeholders": { "seconds": { "type": "String" } }
+  },
+
+  "invalidOtp": "Invalid OTP. Please check and try again.",
+  "@invalidOtp": {},
+
+  "whereTo": "Where to?",
+  "@whereTo": {},
+
+  "home": "Home",
+  "@home": {},
+
+  "trips": "Trips",
+  "@trips": {},
+
+  "wallet": "Wallet",
+  "@wallet": {},
+
+  "profile": "Profile",
+  "@profile": {},
+
+  "selectService": "Select Service",
+  "@selectService": {},
+
+  "searchingDrivers": "Searching for nearby drivers…",
+  "@searchingDrivers": {},
+
+  "tripComplete": "Trip Complete!",
+  "@tripComplete": {},
+
+  "rateYourDriver": "How was your trip with your driver?",
+  "@rateYourDriver": {},
+
+  "submitRating": "Submit Rating",
+  "@submitRating": {},
+
+  "cancel": "Cancel",
+  "@cancel": {},
+
+  "cancelSearch": "Cancel Search",
+  "@cancelSearch": {}
+}

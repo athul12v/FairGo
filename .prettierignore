@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.next/
+build/
+coverage/
+*.log
+pnpm-lock.yaml
+apps/rider-mobile/
+apps/driver-mobile/
+infra/terraform/

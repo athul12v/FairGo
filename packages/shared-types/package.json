@@ -1,0 +1,23 @@
+{
+  "name": "@fairgo/shared-types",
+  "version": "0.1.0",
+  "description": "Shared TypeScript types, enums, DTOs, and interfaces for FairGo platform",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist *.tsbuildinfo",
+    "dev": "tsc -p tsconfig.json --watch"
+  },
+  "devDependencies": {
+    "rimraf": "^6.0.0",
+    "typescript": "^5.5.0"
+  }
+}

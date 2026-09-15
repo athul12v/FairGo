@@ -1,0 +1,26 @@
+{
+  "name": "@fairgo/event-contracts",
+  "version": "0.1.0",
+  "description": "Versioned Kafka event schemas and TypeScript types for FairGo platform",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist *.tsbuildinfo"
+  },
+  "dependencies": {
+    "@fairgo/shared-types": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "rimraf": "^6.0.0",
+    "typescript": "^5.5.0"
+  }
+}

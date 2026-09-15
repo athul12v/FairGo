@@ -1,0 +1,20 @@
+{
+  "name": "@fairgo/migrations",
+  "version": "0.1.0",
+  "description": "Database migrations for FairGo platform",
+  "private": true,
+  "scripts": {
+    "migrate": "node-pg-migrate up -m src/migrations",
+    "migrate:rollback": "node-pg-migrate down -m src/migrations",
+    "migrate:create": "node-pg-migrate create -m src/migrations",
+    "migrate:status": "node-pg-migrate status -m src/migrations"
+  },
+  "dependencies": {
+    "node-pg-migrate": "^7.0.0",
+    "pg": "^8.12.0",
+    "dotenv": "^16.4.0"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.11.0"
+  }
+}

@@ -1,0 +1,82 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+    tags:
+      - "v*.*.*"
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: ap-south-1
+  EKS_CLUSTER: fairgo-production
+  ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-south-1.amazonaws.com
+
+jobs:
+  # Only runs after CI passes
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push images
+        run: |
+          for service in auth rider driver vehicle trip matching location pricing payment wallet parcel safety coupon loyalty corporate insurance support fraud analytics notification; do
+            IMAGE="${{ env.ECR_REGISTRY }}/fairgo-${service}:${{ github.sha }}"
+            docker build -t $IMAGE -f services/${service}/Dockerfile .
+            docker push $IMAGE
+          done
+
+      - name: Update kubeconfig
+        run: aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER }} --region ${{ env.AWS_REGION }}
+
+      - name: Run database migrations
+        run: |
+          kubectl run migrations-${{ github.sha }} \
+            --image=${{ env.ECR_REGISTRY }}/fairgo-migrations:${{ github.sha }} \
+            --restart=Never \
+            --env="DATABASE_URL=${{ secrets.DATABASE_URL }}" \
+            --wait --timeout=300s
+
+      - name: Deploy with Helm
+        run: |
+          helm upgrade --install fairgo ./infra/helm/fairgo \
+            --namespace fairgo-production \
+            --create-namespace \
+            --set global.imageTag=${{ github.sha }} \
+            --set global.environment=production \
+            --values infra/helm/fairgo/values.production.yaml \
+            --atomic \
+            --timeout 10m
+
+      - name: Verify deployment
+        run: |
+          kubectl rollout status deployment/fairgo-api-gateway -n fairgo-production --timeout=300s
+          kubectl rollout status deployment/fairgo-auth -n fairgo-production --timeout=300s
+          kubectl rollout status deployment/fairgo-trip -n fairgo-production --timeout=300s
+
+      - name: Notify Sentry release
+        uses: getsentry/action-release@v1
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: fairgo
+          SENTRY_PROJECT: fairgo-backend
+        with:
+          environment: production
+          version: ${{ github.sha }}

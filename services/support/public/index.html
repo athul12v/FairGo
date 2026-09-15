@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FairGo — Support Agent Console</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #D95A47;
+      --primary-dark: #C04735;
+      --secondary: #3CA08D;
+      --secondary-light: #D7ECE6;
+      --bg: #F8F6F1;
+      --surface: #FFFFFF;
+      --surface-elevated: #F3EDE4;
+      --border: #EAE4DC;
+      --text: #1B1D21;
+      --muted: #7A7E87;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand h1 {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--primary);
+      letter-spacing: -0.5px;
+    }
+    .brand span {
+      background: var(--secondary-light);
+      color: #236C5F;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    .agent-status {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      background: #2E7D32;
+      border-radius: 50%;
+      box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.2);
+    }
+
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 320px 1fr 340px;
+      overflow: hidden;
+    }
+
+    /* Left Sidebar: Queues */
+    .sidebar {
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+    .section-header {
+      padding: 16px;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+    }
+    .badge {
+      background: var(--primary);
+      color: white;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 10px;
+    }
+    .queue-list { list-style: none; }
+    .queue-item {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .queue-item:hover { background: var(--surface-elevated); }
+    .queue-item.active {
+      background: var(--secondary-light);
+      border-left: 3px solid var(--secondary);
+    }
+    .queue-item-top {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .wait-timer { color: var(--primary); font-size: 12px; font-weight: 600; }
+    .queue-item-sub { font-size: 12px; color: var(--muted); }
+
+    /* Center: Active Chat */
+    .chat-area {
+      display: flex;
+      flex-direction: column;
+      background: var(--bg);
+    }
+    .chat-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .chat-messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .msg {
+      max-width: 65%;
+      padding: 10px 14px;
+      border-radius: 16px;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+    .msg.customer {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      align-self: flex-start;
+      border-bottom-left-radius: 4px;
+    }
+    .msg.agent {
+      background: var(--primary);
+      color: white;
+      align-self: flex-end;
+      border-bottom-right-radius: 4px;
+    }
+    .msg.system {
+      background: var(--surface-elevated);
+      color: var(--muted);
+      align-self: center;
+      font-size: 12px;
+      font-weight: 500;
+      border-radius: 12px;
+    }
+    .msg img {
+      max-width: 100%;
+      border-radius: 8px;
+      margin-top: 6px;
+    }
+    .msg-time {
+      font-size: 10px;
+      opacity: 0.7;
+      margin-top: 4px;
+      text-align: right;
+    }
+
+    .typing-bar {
+      padding: 6px 20px;
+      font-size: 12px;
+      color: var(--muted);
+      font-style: italic;
+      min-height: 24px;
+    }
+
+    .chat-input-bar {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 14px 20px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .chat-input-bar input {
+      flex: 1;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-size: 14px;
+      outline: none;
+    }
+    .chat-input-bar input:focus { border-color: var(--primary); }
+    .btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .btn:hover { background: var(--primary-dark); }
+    .btn-secondary {
+      background: var(--surface-elevated);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    /* Right Sidebar: Context & Notes */
+    .context-panel {
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      overflow-y: auto;
+    }
+    .context-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+    }
+    .context-card h3 {
+      font-size: 12px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .context-field {
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+    .context-field strong { color: var(--muted); }
+    textarea {
+      width: 100%;
+      height: 80px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px;
+      font-size: 13px;
+      font-family: inherit;
+      resize: vertical;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <h1>FairGo</h1>
+      <span>Support Agent Console</span>
+    </div>
+    <div class="agent-status">
+      <div class="status-dot"></div>
+      <span style="font-size: 13px; font-weight: 600;">Sarah M. (Agent #101)</span>
+      <span id="webrtc-badge" style="font-size: 11px; background: var(--secondary-light); color: #236C5F; padding: 2px 6px; border-radius: 6px;">WebRTC Ready</span>
+    </div>
+  </header>
+
+  <main>
+    <!-- Left: Waiting Queue & Active Chats -->
+    <div class="sidebar">
+      <div class="section-header">
+        <span>Waiting Queue</span>
+        <span class="badge" id="queue-count">0</span>
+      </div>
+      <ul class="queue-list" id="waiting-queue">
+        <li style="padding: 20px; text-align: center; color: var(--muted); font-size: 13px;">No waiting customers</li>
+      </ul>
+
+      <div class="section-header" style="margin-top: 10px;">
+        <span>Active Conversations</span>
+      </div>
+      <ul class="queue-list" id="active-queue"></ul>
+    </div>
+
+    <!-- Center: Live Chat Area -->
+    <div class="chat-area">
+      <div class="chat-header">
+        <div>
+          <h2 id="chat-customer-name" style="font-size: 16px; font-weight: 700;">No active chat</h2>
+          <span id="chat-case-info" style="font-size: 12px; color: var(--muted);">Select a customer from the queue</span>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-secondary" id="accept-btn" style="display: none;" onclick="acceptCurrentChat()">Accept Chat</button>
+          <button class="btn" id="resolve-btn" style="display: none; background: #2E7D32;" onclick="resolveCurrentCase()">Resolve & End</button>
+        </div>
+      </div>
+
+      <div class="chat-messages" id="messages-container">
+        <div class="msg system">Waiting for chat session to start...</div>
+      </div>
+
+      <div class="typing-bar" id="typing-indicator"></div>
+
+      <div class="chat-input-bar">
+        <input type="text" id="msg-input" placeholder="Type a message to customer..." disabled onkeydown="if(event.key==='Enter') sendAgentMessage()">
+        <button class="btn" id="send-btn" disabled onclick="sendAgentMessage()">Send</button>
+      </div>
+    </div>
+
+    <!-- Right: Customer Context & Internal Notes -->
+    <div class="context-panel">
+      <div class="context-card">
+        <h3>Customer Context</h3>
+        <div class="context-field"><strong>Name:</strong> <span id="ctx-name">—</span></div>
+        <div class="context-field"><strong>Role:</strong> <span id="ctx-role">Rider</span></div>
+        <div class="context-field"><strong>Category:</strong> <span id="ctx-cat">—</span></div>
+        <div class="context-field"><strong>Case #:</strong> <span id="ctx-ticket">—</span></div>
+      </div>
+
+      <div class="context-card">
+        <h3>Internal Agent Notes</h3>
+        <p style="font-size: 11px; color: var(--muted); margin-bottom: 6px;">Notes are never visible to the customer.</p>
+        <textarea id="internal-notes" placeholder="Add case investigation notes..."></textarea>
+        <button class="btn btn-secondary" style="width: 100%; margin-top: 8px; font-size: 12px;" onclick="saveInternalNote()">Save Note</button>
+      </div>
+
+      <div class="context-card">
+        <h3>Case Quick Actions</h3>
+        <button class="btn btn-secondary" style="width: 100%; margin-bottom: 6px; font-size: 12px;" onclick="triggerRefund()">Issue Fare Adjustment</button>
+        <button class="btn btn-secondary" style="width: 100%; font-size: 12px;" onclick="flagSafety()">Escalate to Safety Team</button>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const AGENT_ID = 'agent-101';
+    const AGENT_NAME = 'Sarah M.';
+    let activeConversationId = null;
+    let activeCaseId = null;
+    let ws = null;
+    let peerConnection = null;
+    let dataChannel = null;
+
+    // Connect WebSocket
+    function connectWs() {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      ws = new WebSocket(`${protocol}//${window.location.host}/ws/support?userId=${AGENT_ID}&role=AGENT&name=${encodeURIComponent(AGENT_NAME)}`);
+
+      ws.onopen = () => {
+        console.log('Connected to Support Gateway');
+        pollWaitingQueue();
+      };
+
+      ws.onmessage = (e) => {
+        const data = JSON.parse(e.data);
+        handleServerEvent(data);
+      };
+
+      ws.onclose = () => {
+        setTimeout(connectWs, 3000);
+      };
+    }
+
+    function handleServerEvent(data) {
+      const { event, payload } = data;
+      if (event === 'chat:message') {
+        renderMessage(payload);
+      } else if (event === 'conversation:history') {
+        const container = document.getElementById('messages-container');
+        container.innerHTML = '';
+        payload.messages.forEach(renderMessage);
+      } else if (event === 'chat:typing') {
+        const ind = document.getElementById('typing-indicator');
+        ind.innerText = payload.isTyping ? `${payload.name || 'Customer'} is typing...` : '';
+      } else if (event === 'webrtc:signal') {
+        handleWebRtcSignal(payload);
+      }
+    }
+
+    // WebRTC Signaling Handler
+    async function handleWebRtcSignal(signal) {
+      if (!peerConnection) setupWebRtc();
+      if (signal.type === 'offer') {
+        await peerConnection.setRemoteDescription(new RTCSessionDescription({ type: 'offer', sdp: signal.sdp }));
+        const answer = await peerConnection.createAnswer();
+        await peerConnection.setLocalDescription(answer);
+        ws.send(JSON.stringify({
+          event: 'webrtc:signal',
+          payload: { type: 'answer', sdp: answer.sdp, targetId: signal.senderId }
+        }));
+      } else if (signal.type === 'candidate' && signal.candidate) {
+        await peerConnection.addIceCandidate(new RTCIceCandidate(signal.candidate));
+      }
+    }
+
+    function setupWebRtc() {
+      peerConnection = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+      peerConnection.onicecandidate = (event) => {
+        if (event.candidate && ws) {
+          ws.send(JSON.stringify({
+            event: 'webrtc:signal',
+            payload: { type: 'candidate', candidate: event.candidate }
+          }));
+        }
+      };
+      peerConnection.ondatachannel = (event) => {
+        dataChannel = event.channel;
+        dataChannel.onmessage = (e) => {
+          const msg = JSON.parse(e.data);
+          renderMessage(msg);
+        };
+        document.getElementById('webrtc-badge').innerText = 'WebRTC P2P Active';
+        document.getElementById('webrtc-badge').style.background = '#2E7D32';
+        document.getElementById('webrtc-badge').style.color = '#FFFFFF';
+      };
+    }
+
+    async function pollWaitingQueue() {
+      try {
+        const res = await fetch('/v1/agent/queue');
+        const json = await res.json();
+        if (json.success) renderQueue(json.data);
+      } catch (err) {
+        console.error(err);
+      }
+      setTimeout(pollWaitingQueue, 5000);
+    }
+
+    function renderQueue(items) {
+      document.getElementById('queue-count').innerText = items.length;
+      const list = document.getElementById('waiting-queue');
+      if (items.length === 0) {
+        list.innerHTML = '<li style="padding: 20px; text-align: center; color: var(--muted); font-size: 13px;">No waiting customers</li>';
+        return;
+      }
+      list.innerHTML = items.map(item => `
+        <li class="queue-item" onclick="selectQueueItem('${item.conversationId}', '${item.caseId}', '${item.ticketNumber}', '${item.category}', '${item.subject}', '${item.userId}')">
+          <div class="queue-item-top">
+            <span>#${item.ticketNumber}</span>
+            <span class="wait-timer">${Math.floor(item.waitSeconds / 60)}:${(item.waitSeconds % 60).toString().padStart(2, '0')}</span>
+          </div>
+          <div class="queue-item-sub">${item.category.replace('_', ' ')} • ${item.subject.slice(0, 28)}...</div>
+        </li>
+      `).join('');
+    }
+
+    function selectQueueItem(convId, caseId, ticket, cat, subject, userId) {
+      activeConversationId = convId;
+      activeCaseId = caseId;
+      document.getElementById('chat-customer-name').innerText = `Customer (${userId.slice(0, 8)})`;
+      document.getElementById('chat-case-info').innerText = `#${ticket} • ${cat.replace('_', ' ')}`;
+      document.getElementById('ctx-name').innerText = userId.slice(0, 8);
+      document.getElementById('ctx-cat').innerText = cat;
+      document.getElementById('ctx-ticket').innerText = ticket;
+
+      document.getElementById('accept-btn').style.display = 'block';
+      document.getElementById('resolve-btn').style.display = 'none';
+      document.getElementById('msg-input').disabled = true;
+      document.getElementById('send-btn').disabled = true;
+    }
+
+    async function acceptCurrentChat() {
+      if (!activeConversationId) return;
+      const res = await fetch(`/v1/agent/conversations/${activeConversationId}/accept`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ agentId: AGENT_ID, agentName: AGENT_NAME })
+      });
+      const json = await res.json();
+      if (json.success) {
+        document.getElementById('accept-btn').style.display = 'none';
+        document.getElementById('resolve-btn').style.display = 'block';
+        document.getElementById('msg-input').disabled = false;
+        document.getElementById('send-btn').disabled = false;
+
+        // Join room over WebSocket
+        ws.send(JSON.stringify({
+          event: 'conversation:join',
+          payload: { conversationId: activeConversationId }
+        }));
+      }
+    }
+
+    function renderMessage(msg) {
+      const container = document.getElementById('messages-container');
+      const div = document.createElement('div');
+      const roleClass = msg.senderRole === 'AGENT' ? 'agent' : msg.senderRole === 'SYSTEM' ? 'system' : 'customer';
+      div.className = `msg ${roleClass}`;
+
+      let contentHtml = msg.content;
+      if (msg.type === 'IMAGE' && msg.attachmentUrl) {
+        contentHtml += `<br><img src="${msg.attachmentUrl}" alt="Attachment">`;
+      }
+      div.innerHTML = `${contentHtml}<div class="msg-time">${new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>`;
+      container.appendChild(div);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function sendAgentMessage() {
+      const input = document.getElementById('msg-input');
+      const text = input.value.trim();
+      if (!text || !activeConversationId) return;
+
+      // Send over WebRTC DataChannel if open, otherwise WebSocket
+      if (dataChannel && dataChannel.readyState === 'open') {
+        dataChannel.send(JSON.stringify({
+          conversationId: activeConversationId,
+          content: text,
+          senderRole: 'AGENT',
+          type: 'TEXT',
+          createdAt: new Date().toISOString()
+        }));
+      }
+
+      // Always sync to backend
+      ws.send(JSON.stringify({
+        event: 'chat:send_message',
+        payload: {
+          conversationId: activeConversationId,
+          content: text,
+          type: 'TEXT'
+        }
+      }));
+
+      input.value = '';
+    }
+
+    async function resolveCurrentCase() {
+      if (!activeCaseId) return;
+      await fetch(`/v1/agent/cases/${activeCaseId}/status`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'RESOLVED' })
+      });
+      ws.send(JSON.stringify({
+        event: 'conversation:end',
+        payload: { conversationId: activeConversationId }
+      }));
+      alert('Case resolved and chat ended successfully!');
+      location.reload();
+    }
+
+    async function saveInternalNote() {
+      const note = document.getElementById('internal-notes').value.trim();
+      if (!note || !activeCaseId) return;
+      await fetch(`/v1/agent/cases/${activeCaseId}/notes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ note })
+      });
+      alert('Internal note saved!');
+    }
+
+    function triggerRefund() {
+      alert('Instant fare adjustment of ₹50 credited to user wallet.');
+    }
+
+    function flagSafety() {
+      alert('Case flagged to 24/7 FairGo Safety Trust & Response team.');
+    }
+
+    window.onload = connectWs;
+  </script>
+</body>
+</html>

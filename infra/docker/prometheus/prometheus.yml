@@ -1,0 +1,60 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files: []
+
+scrape_configs:
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  - job_name: "fairgo-api-gateway"
+    static_configs:
+      - targets: ["host.docker.internal:3000"]
+    metrics_path: /metrics
+
+  - job_name: "fairgo-auth"
+    static_configs:
+      - targets: ["host.docker.internal:3001"]
+    metrics_path: /metrics
+
+  - job_name: "fairgo-rider"
+    static_configs:
+      - targets: ["host.docker.internal:3002"]
+    metrics_path: /metrics
+
+  - job_name: "fairgo-driver"
+    static_configs:
+      - targets: ["host.docker.internal:3003"]
+    metrics_path: /metrics
+
+  - job_name: "fairgo-trip"
+    static_configs:
+      - targets: ["host.docker.internal:3005"]
+    metrics_path: /metrics
+
+  - job_name: "fairgo-matching"
+    static_configs:
+      - targets: ["host.docker.internal:3006"]
+    metrics_path: /metrics
+
+  - job_name: "fairgo-location"
+    static_configs:
+      - targets: ["host.docker.internal:3007"]
+    metrics_path: /metrics
+
+  - job_name: "fairgo-pricing"
+    static_configs:
+      - targets: ["host.docker.internal:3008"]
+    metrics_path: /metrics
+
+  - job_name: "fairgo-payment"
+    static_configs:
+      - targets: ["host.docker.internal:3009"]
+    metrics_path: /metrics
+
+  - job_name: "fairgo-wallet"
+    static_configs:
+      - targets: ["host.docker.internal:3010"]
+    metrics_path: /metrics
