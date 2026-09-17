@@ -1,9 +1,7 @@
 // lib/core/services/multi_device_sync_service.dart
 
 import 'dart:async';
-import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:rider_app/core/network/api_client.dart';
 import 'package:rider_app/core/services/device_id_service.dart';
 
 /// Represents a synchronization event payload broadcast from server
@@ -74,6 +72,7 @@ class MultiDeviceSyncState {
 }
 
 class MultiDeviceSyncNotifier extends StateNotifier<MultiDeviceSyncState> {
+  // ignore: unused_field
   final Ref _ref;
   StreamSubscription? _socketSubscription;
 
@@ -128,7 +127,7 @@ class MultiDeviceSyncNotifier extends StateNotifier<MultiDeviceSyncState> {
       case 'trip.driver_assigned':
       case 'trip.cancelled':
       case 'trip.completed':
-        // Re-fetch or synchronize active trip provider
+        // Re-fetch or synchronize active trip state
         break;
       case 'wallet.balance.updated':
         // Re-fetch wallet state
