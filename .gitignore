@@ -78,6 +78,10 @@ infra/terraform/**/terraform.tfvars
 *.p12
 *.jks
 *.keystore
+*serviceAccountKey*.json
+serviceAccountKey.json
+google-services.json
+GoogleService-Info.plist
 
 # Docker secrets
 docker-secrets/
