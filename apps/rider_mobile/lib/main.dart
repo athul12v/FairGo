@@ -3,6 +3,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rider_app/core/router/app_router.dart';
 import 'package:rider_app/core/theme/app_theme.dart';
@@ -12,6 +13,13 @@ import 'package:rider_app/l10n/app_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Load environment variables from .env file
+  try {
+    await dotenv.load(fileName: ".env");
+  } catch (e) {
+    debugPrint('Warning: .env file could not be loaded: $e');
+  }
 
   // Allow landscape on tablets and desktop, portrait preferred on small phones
   if (!kIsWeb) {

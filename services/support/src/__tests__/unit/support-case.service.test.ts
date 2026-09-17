@@ -11,6 +11,10 @@ import {
   DeliveryStatus,
 } from '@fairgo/shared-types';
 
+process.env['DATABASE_URL'] = 'postgresql://fairgo:test@localhost:5432/fairgo';
+process.env['REDIS_URL'] = 'redis://localhost:6379';
+process.env['SUPPORT_SERVICE_PORT'] = '3007';
+
 // Mock DB and Redis infrastructure
 const mockDbQuery = jest.fn() as any;
 const mockClient = {

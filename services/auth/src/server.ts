@@ -1,10 +1,21 @@
+import 'dotenv/config';
+import path from 'path';
+import dotenv from 'dotenv';
 import { createApp } from './http/app.js';
 import { closeDb, closeRedis } from './infrastructure/database.js';
 import { createLogger } from '@fairgo/logger';
 
+// Load .env from service directory or workspace root
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
+dotenv.config({ path: path.resolve(process.cwd(), '../../.env') });
+
 const log = createLogger('auth-service');
 
-const PORT = parseInt(process.env['PORT'] ?? '3001', 10);
+const rawPort = process.env['AUTH_SERVICE_PORT'] ?? process.env['PORT'];
+if (!rawPort) {
+  throw new Error('Neither AUTH_SERVICE_PORT nor PORT is defined in .env');
+}
+const PORT = parseInt(rawPort, 10);
 
 async function main(): Promise<void> {
   // Validate required environment variables

@@ -1,5 +1,6 @@
-// services/support/src/server.ts
-
+import 'dotenv/config';
+import path from 'path';
+import dotenv from 'dotenv';
 import http from 'http';
 import { createApp } from './http/app.js';
 import { SupportCaseService } from './domain/support-case.service.js';
@@ -8,8 +9,23 @@ import { RealtimeGateway } from './infrastructure/realtime-gateway.js';
 import { closeDb, closeRedis } from './infrastructure/database.js';
 import { createLogger } from '@fairgo/logger';
 
+// Load .env from service directory or workspace root
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
+dotenv.config({ path: path.resolve(process.cwd(), '../../.env') });
+
 const log = createLogger('support-service');
-const PORT = parseInt(process.env['PORT'] ?? '3008', 10);
+
+const requiredEnvVars = ['DATABASE_URL', 'REDIS_URL'];
+const missing = requiredEnvVars.filter((key) => !process.env[key]);
+if (missing.length > 0) {
+  throw new Error(`Missing required environment variables in .env: ${missing.join(', ')}`);
+}
+
+const rawPort = process.env['SUPPORT_SERVICE_PORT'] ?? process.env['PORT'];
+if (!rawPort) {
+  throw new Error('Neither SUPPORT_SERVICE_PORT nor PORT is defined in .env');
+}
+const PORT = parseInt(rawPort, 10);
 
 async function main(): Promise<void> {
   const caseService = new SupportCaseService();

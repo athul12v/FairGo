@@ -1,0 +1,31 @@
+{
+  "name": "@fairgo/concurrency",
+  "version": "0.1.0",
+  "description": "Enterprise-grade distributed locking, idempotency, and multi-device concurrency for FairGo",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist *.tsbuildinfo"
+  },
+  "dependencies": {
+    "@fairgo/domain-errors": "workspace:*",
+    "@fairgo/logger": "workspace:*",
+    "@fairgo/shared-types": "workspace:*",
+    "express": "^4.21.0",
+    "ioredis": "^5.4.1"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.0.0",
+    "rimraf": "^6.0.0",
+    "typescript": "^5.5.0"
+  }
+}

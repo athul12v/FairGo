@@ -1,20 +1,20 @@
 // lib/core/network/api_client.dart
 
+import 'dart:async';
+import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rider_app/core/constants/app_constants.dart';
 import 'package:rider_app/core/services/device_id_service.dart';
 import 'package:uuid/uuid.dart';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final apiClientProvider = Provider<Dio>((ref) {
   final dio = Dio(
     BaseOptions(
       baseUrl: AppConstants.baseUrl,
-      connectTimeout: const Duration(seconds: AppConstants.connectTimeoutSeconds),
-      receiveTimeout: const Duration(seconds: AppConstants.receiveTimeoutSeconds),
+      connectTimeout: Duration(seconds: AppConstants.connectTimeoutSeconds),
+      receiveTimeout: Duration(seconds: AppConstants.receiveTimeoutSeconds),
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -25,6 +25,8 @@ final apiClientProvider = Provider<Dio>((ref) {
   dio.interceptors.addAll([
     _AuthInterceptor(dio),
     _RequestIdInterceptor(),
+    _IdempotencyInterceptor(),
+    _ResilientRetryInterceptor(dio),
     _LogInterceptor(),
   ]);
 
@@ -125,14 +127,93 @@ class _AuthInterceptor extends Interceptor {
   }
 }
 
-/// Injects X-Request-ID and X-Correlation-ID on every request.
+/// Injects X-Request-ID, X-Correlation-ID, and X-Device-ID on every request.
 class _RequestIdInterceptor extends Interceptor {
   @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+  Future<void> onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
     const uuid = Uuid();
     options.headers['X-Request-ID'] = uuid.v4();
-    options.headers['X-Correlation-ID'] = uuid.v4();
+    options.headers['X-Correlation-ID'] ??= uuid.v4();
+    
+    final deviceId = await DeviceIdService.getDeviceId();
+    if (deviceId != null) {
+      options.headers['X-Device-ID'] = deviceId;
+    }
     handler.next(options);
+  }
+}
+
+/// Injects deterministic or unique X-Idempotency-Key for all mutative requests (POST, PUT, PATCH, DELETE).
+/// Guarantees that concurrent requests from same or multiple devices are processed exactly once.
+class _IdempotencyInterceptor extends Interceptor {
+  static const _uuid = Uuid();
+
+  @override
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    final method = options.method.toUpperCase();
+    final isMutative = ['POST', 'PUT', 'PATCH', 'DELETE'].contains(method);
+
+    if (isMutative && !options.headers.containsKey('X-Idempotency-Key')) {
+      // If caller did not provide a custom idempotency key, attach a fresh UUIDv4
+      options.headers['X-Idempotency-Key'] = _uuid.v4();
+    }
+
+    options.headers['X-Client-Timestamp'] = DateTime.now().toUtc().toIso8601String();
+    handler.next(options);
+  }
+}
+
+/// Resilient retry interceptor with exponential backoff and full jitter.
+/// Handles transient network timeouts, 429 (Rate Limited), and 502/503/504 gateway errors.
+class _ResilientRetryInterceptor extends Interceptor {
+  final Dio _dio;
+  static const int _maxRetries = 3;
+  static const int _baseDelayMs = 500;
+  static const int _maxDelayMs = 4000;
+  final Random _random = Random();
+
+  _ResilientRetryInterceptor(this._dio);
+
+  @override
+  Future<void> onError(DioException err, ErrorInterceptorHandler handler) async {
+    final requestOptions = err.requestOptions;
+    final retryCount = (requestOptions.extra['retryCount'] as int? ?? 0);
+
+    // Determine if request is eligible for safe retry
+    final statusCode = err.response?.statusCode;
+    final isTransientStatus = statusCode == 429 ||
+        statusCode == 502 ||
+        statusCode == 503 ||
+        statusCode == 504;
+
+    final isNetworkTimeout = err.type == DioExceptionType.connectionTimeout ||
+        err.type == DioExceptionType.sendTimeout ||
+        err.type == DioExceptionType.receiveTimeout ||
+        err.type == DioExceptionType.connectionError;
+
+    final isIdempotentMethod = ['GET', 'HEAD', 'OPTIONS', 'PUT', 'DELETE'].contains(requestOptions.method.toUpperCase());
+    final hasIdempotencyKey = requestOptions.headers.containsKey('X-Idempotency-Key');
+    final isSafeToRetry = isIdempotentMethod || hasIdempotencyKey;
+
+    if ((isTransientStatus || isNetworkTimeout) && isSafeToRetry && retryCount < _maxRetries) {
+      final nextRetryCount = retryCount + 1;
+      requestOptions.extra['retryCount'] = nextRetryCount;
+
+      // Calculate exponential backoff with full jitter
+      final exponentialDelay = min(_maxDelayMs, _baseDelayMs * pow(2, retryCount).toInt());
+      final jitteredDelayMs = (_random.nextDouble() * exponentialDelay).toInt() + (_baseDelayMs ~/ 2);
+
+      await Future.delayed(Duration(milliseconds: jitteredDelayMs));
+
+      try {
+        final response = await _dio.fetch<dynamic>(requestOptions);
+        return handler.resolve(response);
+      } on DioException catch (retryErr) {
+        return handler.next(retryErr);
+      }
+    }
+
+    return handler.next(err);
   }
 }
 
@@ -142,7 +223,7 @@ class _LogInterceptor extends Interceptor {
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     assert(() {
       // ignore: avoid_print
-      print('[API] ${options.method} ${options.uri}');
+      print('[API] ${options.method} ${options.uri} [Idempotency: ${options.headers['X-Idempotency-Key'] ?? 'none'}]');
       return true;
     }());
     handler.next(options);

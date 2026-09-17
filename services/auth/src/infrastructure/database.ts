@@ -39,8 +39,12 @@ let redisClient: ReturnType<typeof createClient> | null = null;
 
 export async function getRedis(): Promise<ReturnType<typeof createClient>> {
   if (!redisClient) {
+    const redisUrl = process.env['REDIS_URL'];
+    if (!redisUrl) {
+      throw new Error('REDIS_URL is not defined in .env');
+    }
     redisClient = createClient({
-      url: process.env['REDIS_URL'] ?? 'redis://localhost:6379',
+      url: redisUrl,
       socket: {
         reconnectStrategy: (retries: number) => Math.min(retries * 100, 5_000),
       },

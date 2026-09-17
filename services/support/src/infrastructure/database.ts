@@ -12,9 +12,10 @@ let redisClient: ReturnType<typeof createClient> | null = null;
 
 export function getDb(): pg.Pool {
   if (!pool) {
-    const connectionString =
-      process.env['DATABASE_URL'] ??
-      'postgresql://fairgo:fairgo_dev_secret@localhost:5432/fairgo';
+    const connectionString = process.env['DATABASE_URL'];
+    if (!connectionString) {
+      throw new Error('DATABASE_URL is not defined in .env');
+    }
     pool = new Pool({
       connectionString,
       max: 20,
@@ -30,7 +31,10 @@ export function getDb(): pg.Pool {
 
 export async function getRedis(): Promise<ReturnType<typeof createClient>> {
   if (!redisClient) {
-    const url = process.env['REDIS_URL'] ?? 'redis://localhost:6379';
+    const url = process.env['REDIS_URL'];
+    if (!url) {
+      throw new Error('REDIS_URL is not defined in .env');
+    }
     redisClient = createClient({ url });
     redisClient.on('error', (err: Error) => {
       log.error('Redis client error', { err });
