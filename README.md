@@ -64,54 +64,46 @@ FairGo comes with two dedicated mobile apps built for cross-device responsivenes
 
 ## 🚀 How to Run the Applications
 
-### Step 1: Set Up the Supabase Database
+### Step 1: Set Up the Firebase / Firestore Database
 
-1. Open your [Supabase Dashboard](https://app.supabase.com/) and create or select your project.
-2. Go to the **SQL Editor** tab on the left menu (`>_ SQL Editor`).
-3. Click **"New query"**.
-4. Open the [`supabase_schema.sql`](./supabase_schema.sql) file from this repository, copy its contents, paste them into the Supabase SQL Editor, and click **"Run"**.
-5. All database schemas, tables, spatial indexes, stored procedures, and initial seed data will be created instantly.
+1. Open your [Firebase Console](https://console.firebase.google.com/) and create or select your project.
+2. Enable **Cloud Firestore** in production mode.
+3. Download your Service Account Key from **Project Settings > Service Accounts > Generate New Private Key**.
+4. Run the single-file initialization and seed script:
+   ```bash
+   npm install firebase-admin
+   set GOOGLE_APPLICATION_CREDENTIALS=path/to/serviceAccountKey.json
+   node firebase_init.js
+   ```
+5. Deploy Firestore Security Rules and Indexes:
+   ```bash
+   firebase deploy --only firestore:rules,firestore:indexes
+   ```
 
 ---
 
-### Step 2: Where to Give Your Supabase Credentials
+### Step 2: Where to Give Your Firebase Credentials
 
 #### 1. Backend Microservices:
 In the project root, duplicate `.env.example` to `.env`:
 ```bash
 cp .env.example .env
 ```
-Fill in your Supabase connection parameters (found in **Supabase Dashboard > Project Settings > Database** and **Project Settings > API**):
+Fill in your Firebase project parameters:
 ```env
-# Database Connection
-DATABASE_URL=postgresql://postgres.[YOUR-PROJECT-REF]:[YOUR-PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres?pgbouncer=true
-
-# API Access
-SUPABASE_URL=https://[YOUR-PROJECT-REF].supabase.co
-SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+# Firebase Configuration
+FIREBASE_PROJECT_ID=fairgo-app
+FIREBASE_CLIENT_EMAIL=firebase-adminsdk-...@fairgo-app.iam.gserviceaccount.com
+GOOGLE_APPLICATION_CREDENTIALS=./serviceAccountKey.json
 ```
 
 #### 2. Mobile Applications (Flutter):
-You can pass your credentials at runtime or configure them in the constants file:
-
-- **Option A (Recommended — command line define):**
-  ```bash
-  flutter run --dart-define=SUPABASE_URL=https://[YOUR-PROJECT-REF].supabase.co --dart-define=SUPABASE_ANON_KEY=[YOUR-ANON-KEY]
-  ```
-
-- **Option B (Direct file configuration):**
-  Open [`apps/rider_mobile/lib/core/constants/app_constants.dart`](apps/rider_mobile/lib/core/constants/app_constants.dart) and update:
-  ```dart
-  static const String supabaseUrl = String.fromEnvironment(
-    'SUPABASE_URL',
-    defaultValue: 'https://[YOUR-PROJECT-REF].supabase.co',
-  );
-  static const String supabaseAnonKey = String.fromEnvironment(
-    'SUPABASE_ANON_KEY',
-    defaultValue: '[YOUR-ANON-KEY]',
-  );
-  ```
+Configure your `apps/rider_mobile/.env` and `apps/driver_mobile/.env` with your Firebase credentials:
+```env
+FIREBASE_PROJECT_ID=fairgo-app
+FIREBASE_API_KEY=AIzaSy...
+FIREBASE_APP_ID=1:1234567890:android:...
+```
 
 ---
 

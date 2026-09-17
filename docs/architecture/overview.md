@@ -34,11 +34,11 @@
        │           │                                              │
        ▼           ▼                                              ▼
 ┌──────────┐ ┌──────────────────┐                        ┌──────────────┐
-│PostgreSQL│ │     Redis 7      │                        │    Kafka     │
-│(Supabase)│ │  Cache │ GEO     │                        │  Event Bus   │
+│ Firebase │ │     Redis 7      │                        │    Kafka     │
+│ Firestore│ │  Cache │ GEO     │                        │  Event Bus   │
 │          │ │  Pub/Sub │ Locks │                        │              │
-│ Per-svc  │ │  Session Store   │                        │ Schema Reg.  │
-│ schema   │ │  Rate Limiter    │                        │              │
+│Per-collec│ │  Session Store   │                        │ Schema Reg.  │
+│  schema  │ │  Rate Limiter    │                        │              │
 └──────────┘ └──────────────────┘                        └──────────────┘
 ```
 

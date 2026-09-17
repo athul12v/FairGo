@@ -181,7 +181,7 @@ export interface DriverDocument {
   readonly id: UUID;
   readonly driverId: UUID;
   readonly type: DocumentType;
-  readonly fileUrl: string; // signed URL from Supabase Storage
+  readonly fileUrl: string; // signed URL from Firebase Cloud Storage
   readonly status: KycStatus;
   readonly expiresAt?: ISO8601;
   readonly reviewNote?: string;

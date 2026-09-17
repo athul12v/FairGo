@@ -23,9 +23,10 @@ class DriverConstants {
   static String get baseUrl => _get('API_BASE_URL');
   static String get wsUrl => _get('WS_URL');
 
-  // Supabase Credentials (loaded from .env)
-  static String get supabaseUrl => _get('SUPABASE_URL');
-  static String get supabaseAnonKey => _get('SUPABASE_ANON_KEY');
+  // Firebase Configuration (loaded from .env with fallback)
+  static String get firebaseProjectId => _getOptional('FIREBASE_PROJECT_ID', 'fairgo-app');
+  static String get firebaseApiKey => _getOptional('FIREBASE_API_KEY', '');
+  static String get firebaseAppId => _getOptional('FIREBASE_APP_ID', '');
 
   // Storage keys (internal local secure storage identifiers)
   static const String keyAccessToken = 'fairgo_driver_access_token';

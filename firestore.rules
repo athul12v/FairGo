@@ -1,0 +1,136 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function hasRole(role) {
+      return isAuthenticated() && request.auth.token.role == role;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && (
+        request.auth.token.role == 'ADMIN_SUPER' ||
+        request.auth.token.role == 'ADMIN_CITY_OPS' ||
+        request.auth.token.role == 'ADMIN_SUPPORT'
+      );
+    }
+
+    // Users Collection
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if isOwner(userId) || isAdmin();
+    }
+
+    // Rider Profiles
+    match /rider_profiles/{riderId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isOwner(riderId) || isAdmin();
+      allow delete: if isAdmin();
+      
+      match /saved_places/{placeId} {
+        allow read, write: if isOwner(riderId) || isAdmin();
+      }
+    }
+
+    // Driver Profiles & Live Location
+    match /driver_profiles/{driverId} {
+      allow read: if isAuthenticated();
+      allow create: if isOwner(driverId);
+      allow update: if isOwner(driverId) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Vehicles
+    match /vehicles/{vehicleId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated() && (request.resource.data.driverId == request.auth.uid || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    // Trips (State Machine Security)
+    match /trips/{tripId} {
+      allow read: if isAuthenticated() && (
+        resource.data.riderId == request.auth.uid ||
+        resource.data.driverId == request.auth.uid ||
+        isAdmin()
+      );
+      allow create: if isAuthenticated() && request.resource.data.riderId == request.auth.uid;
+      allow update: if isAuthenticated() && (
+        resource.data.riderId == request.auth.uid ||
+        resource.data.driverId == request.auth.uid ||
+        resource.data.driverId == null || // Driver claiming trip
+        isAdmin()
+      );
+    }
+
+    // Pricing & Cities (Public Read, Admin Write)
+    match /pricing_cities/{cityId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /pricing_rules/{ruleId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Wallets & Immutable Ledgers
+    match /wallets/{walletId} {
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow write: if isAdmin(); // Financial mutations exclusively via backend Cloud Functions
+      
+      match /ledger_entries/{entryId} {
+        allow read: if isAuthenticated() && (get(/databases/$(database)/documents/wallets/$(walletId)).data.userId == request.auth.uid || isAdmin());
+        allow write: if false; // Immutable ledger (only backend admin/Cloud Functions can write)
+      }
+    }
+
+    // Payments
+    match /payments/{paymentId} {
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow write: if isAdmin();
+    }
+
+    // Support Cases & Chat
+    match /support_cases/{caseId} {
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+
+      match /messages/{messageId} {
+        allow read: if isAuthenticated() && (
+          get(/databases/$(database)/documents/support_cases/$(caseId)).data.userId == request.auth.uid ||
+          isAdmin()
+        );
+        allow create: if isAuthenticated();
+      }
+    }
+
+    // Support FAQs
+    match /support_faqs/{faqId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // SOS Alerts
+    match /sos_alerts/{alertId} {
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update: if isAdmin();
+    }
+
+    // Notifications
+    match /notifications/{notifId} {
+      allow read, update: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create, delete: if isAdmin();
+    }
+  }
+}
