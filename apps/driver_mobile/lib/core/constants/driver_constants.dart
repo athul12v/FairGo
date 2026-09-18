@@ -5,11 +5,12 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 class DriverConstants {
   DriverConstants._();
 
-  static String _get(String key) {
+  static String _get(String key, {String fallback = ''}) {
     if (dotenv.isInitialized && dotenv.env[key] != null && dotenv.env[key]!.isNotEmpty) {
       return dotenv.env[key]!;
     }
-    throw StateError('Missing required environment variable "$key" in .env file. Please check your .env configuration.');
+    if (fallback.isNotEmpty) return fallback;
+    return '';
   }
 
   static String _getOptional(String key, String fallback) {
@@ -19,9 +20,9 @@ class DriverConstants {
     return fallback;
   }
 
-  // API & Gateway (loaded from .env)
-  static String get baseUrl => _get('API_BASE_URL');
-  static String get wsUrl => _get('WS_URL');
+  // API & Gateway (with safe local emulator defaults)
+  static String get baseUrl => _get('API_BASE_URL', fallback: 'http://10.0.2.2:3000');
+  static String get wsUrl => _get('WS_URL', fallback: 'ws://10.0.2.2:3007');
 
   // Firebase Configuration (loaded from .env with fallback)
   static String get firebaseProjectId => _getOptional('FIREBASE_PROJECT_ID', 'fairgo-app');

@@ -101,7 +101,7 @@ flutter:
   generate: true
 
   assets:
-    - .env
+    - assets/env/app.env
     - assets/images/
     - assets/icons/
     - assets/animations/

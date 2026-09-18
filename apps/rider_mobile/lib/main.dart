@@ -14,11 +14,15 @@ import 'package:rider_app/l10n/app_localizations.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Load environment variables from .env file
+  // Load environment variables (from assets/env/app.env or .env)
   try {
-    await dotenv.load(fileName: ".env");
-  } catch (e) {
-    debugPrint('Warning: .env file could not be loaded: $e');
+    await dotenv.load(fileName: "assets/env/app.env");
+  } catch (_) {
+    try {
+      await dotenv.load(fileName: ".env");
+    } catch (e) {
+      debugPrint('Info: Using default configuration: $e');
+    }
   }
 
   // Allow landscape on tablets and desktop, portrait preferred on small phones
