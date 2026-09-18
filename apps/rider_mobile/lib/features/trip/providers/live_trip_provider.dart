@@ -4,12 +4,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:rider_app/core/constants/app_constants.dart';
 import 'package:rider_app/core/network/api_client.dart';
-
-part 'live_trip_provider.g.dart';
 
 class LiveTripState {
   final String tripId;
@@ -100,22 +98,23 @@ class LiveTripState {
   );
 }
 
-@riverpod
-class LiveTrip extends _$LiveTrip {
+class LiveTripNotifier extends AutoDisposeFamilyAsyncNotifier<LiveTripState, String> {
   WebSocketChannel? _channel;
   StreamSubscription<dynamic>? _subscription;
+  late String _tripId;
 
   @override
-  Future<LiveTripState> build(String tripId) async {
+  Future<LiveTripState> build(String arg) async {
+    _tripId = arg;
     // Fetch initial trip state from REST
     final dio = ref.watch(apiClientProvider);
-    final resp = await dio.get<Map<String, dynamic>>('/v1/trips/$tripId');
+    final resp = await dio.get<Map<String, dynamic>>('/v1/trips/$_tripId');
     final data = resp.data?['data'] as Map<String, dynamic>? ?? {};
 
     final initialState = _tripFromJson(data);
 
     // Connect WebSocket for live updates
-    _connectWebSocket(tripId, initialState);
+    _connectWebSocket(_tripId, initialState);
 
     // Cleanup on dispose
     ref.onDispose(() {
@@ -183,7 +182,7 @@ class LiveTrip extends _$LiveTrip {
 
   Future<void> cancelTrip(String reason) async {
     final dio = ref.read(apiClientProvider);
-    await dio.post<void>('/v1/trips/$tripId/cancel', data: {'reason': reason});
+    await dio.post<void>('/v1/trips/$_tripId/cancel', data: {'reason': reason});
   }
 
   static LiveTripState _tripFromJson(Map<String, dynamic> data) {
@@ -210,8 +209,14 @@ class LiveTrip extends _$LiveTrip {
       dropLat: (drop['lat'] as num?)?.toDouble() ?? 0,
       dropLon: (drop['lon'] as num?)?.toDouble() ?? 0,
       dropAddress: drop['address'] as String? ?? '',
+      driverLat: (driver['currentLat'] as num?)?.toDouble(),
+      driverLon: (driver['currentLon'] as num?)?.toDouble(),
       etaSeconds: data['etaSeconds'] as int? ?? 0,
       estimatedFarePaise: data['estimatedFarePaise'] as int? ?? 0,
     );
   }
 }
+
+final liveTripProvider = AsyncNotifierProvider.autoDispose.family<LiveTripNotifier, LiveTripState, String>(
+  LiveTripNotifier.new,
+);

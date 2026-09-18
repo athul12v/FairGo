@@ -4,13 +4,11 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:driver_app/core/constants/driver_constants.dart';
 import 'package:driver_app/core/network/api_client.dart';
-
-part 'trip_request_provider.g.dart';
 
 class TripRequest {
   final String tripId;
@@ -72,8 +70,7 @@ class TripRequest {
   );
 }
 
-@riverpod
-class TripRequestNotifier extends _$TripRequestNotifier {
+class TripRequestNotifier extends Notifier<TripRequest?> {
   WebSocketChannel? _channel;
   StreamSubscription<dynamic>? _sub;
   Timer? _expiryTimer;
@@ -149,5 +146,6 @@ class TripRequestNotifier extends _$TripRequestNotifier {
   }
 }
 
-// Convenience alias
-final tripRequestProvider = tripRequestNotifierProvider;
+final tripRequestProvider = NotifierProvider<TripRequestNotifier, TripRequest?>(
+  TripRequestNotifier.new,
+);

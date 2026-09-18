@@ -5,11 +5,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:driver_app/core/constants/driver_constants.dart';
-
-part 'location_service.g.dart';
 
 /// Battery-aware location update intervals (matches AGENTS.md spec):
 /// - Stationary (speed < 2 km/h): 30 seconds
@@ -19,8 +17,7 @@ const _stationaryInterval = Duration(seconds: 30);
 const _slowInterval = Duration(seconds: 10);
 const _fastInterval = Duration(seconds: 3);
 
-@Riverpod(keepAlive: true)
-class LocationStreamService extends _$LocationStreamService {
+class LocationStreamService extends Notifier<AsyncValue<Position?>> {
   WebSocketChannel? _channel;
   StreamSubscription<Position>? _positionSub;
   Position? _lastPosition;
@@ -115,3 +112,7 @@ class LocationStreamService extends _$LocationStreamService {
     }
   }
 }
+
+final locationStreamServiceProvider = NotifierProvider<LocationStreamService, AsyncValue<Position?>>(
+  LocationStreamService.new,
+);
