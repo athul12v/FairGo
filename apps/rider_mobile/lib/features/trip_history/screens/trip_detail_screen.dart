@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 
 class TripDetailScreen extends StatelessWidget {
-  const TripDetailScreen({super.key});
+  final String tripId;
+  const TripDetailScreen({super.key, required this.tripId});
+
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(body: Center(child: Text('TODO: TripDetailScreen')));
+    return Scaffold(
+      appBar: AppBar(title: const Text('Trip Detail')),
+      body: Center(child: Text('Trip Detail for: $tripId')),
+    );
   }
 }

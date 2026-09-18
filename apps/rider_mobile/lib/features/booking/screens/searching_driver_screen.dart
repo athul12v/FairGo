@@ -102,8 +102,10 @@ class _SearchingDriverScreenState extends ConsumerState<SearchingDriverScreen> {
 
   Future<void> _cancelSearch() async {
     _cleanup();
-    final dio = ref.read(apiClientProvider);
-    await dio.post<void>('/v1/trips/${widget.tripId}/cancel', data: {'reason': 'RIDER_CANCELLED'}).ignore();
+    try {
+      final dio = ref.read(apiClientProvider);
+      await dio.post<void>('/v1/trips/${widget.tripId}/cancel', data: {'reason': 'RIDER_CANCELLED'});
+    } catch (_) {}
     if (mounted) context.go(AppRoutes.home);
   }
 
@@ -129,13 +131,16 @@ class _SearchingDriverScreenState extends ConsumerState<SearchingDriverScreen> {
                 const Spacer(),
 
                 // Animation
-                Lottie.asset(
-                  'assets/animations/car_searching.json',
+                SizedBox(
                   width: 220,
-                  errorBuilder: (_, __, ___) => const Icon(
-                    Icons.search,
-                    color: AppColors.primary,
-                    size: 80,
+                  height: 220,
+                  child: Lottie.asset(
+                    'assets/animations/car_searching.json',
+                    errorBuilder: (context, error, stackTrace) => const Icon(
+                      Icons.search,
+                      color: AppColors.primary,
+                      size: 80,
+                    ),
                   ),
                 ).animate().fadeIn(duration: 600.ms).scale(begin: const Offset(0.8, 0.8)),
 

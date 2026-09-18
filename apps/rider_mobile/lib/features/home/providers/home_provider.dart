@@ -83,7 +83,7 @@ final homeProvider = FutureProvider<HomeState>((ref) async {
     profilePhotoUrl: profileData['profilePhotoUrl'] as String?,
     nearbyDriverMarkers: markers,
   );
-}
+});
 
 Future<Position> _getCurrentPosition() async {
   bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
