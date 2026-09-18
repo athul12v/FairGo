@@ -72,7 +72,6 @@ dependencies:
 
   # Auth & Security
   local_auth: ^2.3.0
-  flutter_secure_storage: ^9.2.4
 
   # Analytics / Crash
   firebase_analytics: ^11.4.0
