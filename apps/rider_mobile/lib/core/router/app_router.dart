@@ -5,11 +5,14 @@ import 'package:rider_app/core/providers/auth_provider.dart';
 
 // Screens
 import 'package:rider_app/features/onboarding/screens/onboarding_screen.dart';
+import 'package:rider_app/features/auth/screens/welcome_screen.dart';
 import 'package:rider_app/features/auth/screens/phone_entry_screen.dart';
 import 'package:rider_app/features/auth/screens/otp_verification_screen.dart';
 import 'package:rider_app/features/auth/screens/profile_setup_screen.dart';
 import 'package:rider_app/features/auth/screens/signup_screen.dart';
 import 'package:rider_app/features/auth/screens/forgot_password_screen.dart';
+import 'package:rider_app/features/auth/screens/reset_password_screen.dart';
+import 'package:rider_app/features/auth/screens/account_created_screen.dart';
 import 'package:rider_app/features/home/screens/home_screen.dart';
 import 'package:rider_app/features/booking/screens/service_selection_screen.dart';
 import 'package:rider_app/features/booking/screens/location_picker_screen.dart';
@@ -35,12 +38,15 @@ import 'package:rider_app/features/notifications/screens/notifications_screen.da
 
 // Named routes
 class AppRoutes {
+  static const welcome = '/welcome';
   static const onboarding = '/onboarding';
   static const phoneEntry = '/auth/phone';
   static const otpVerification = '/auth/otp';
   static const profileSetup = '/auth/profile';
   static const signup = '/auth/signup';
   static const forgotPassword = '/auth/forgot-password';
+  static const resetPassword = '/auth/reset-password';
+  static const accountCreated = '/auth/account-created';
   static const home = '/';
   static const serviceSelection = '/booking/select-service';
   static const locationPicker = '/booking/location';
@@ -73,15 +79,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     debugLogDiagnostics: false,
     redirect: (context, state) {
       final isAuthenticated = authState.valueOrNull?.isAuthenticated ?? false;
-      final isOnboarded = authState.valueOrNull?.isOnboarded ?? false;
       final isAuthRoute = state.matchedLocation.startsWith('/auth') ||
+          state.matchedLocation == AppRoutes.welcome ||
           state.matchedLocation == AppRoutes.onboarding;
 
-      if (!isOnboarded && !isAuthRoute) {
-        return AppRoutes.onboarding;
-      }
       if (!isAuthenticated && !isAuthRoute) {
-        return AppRoutes.phoneEntry;
+        return AppRoutes.welcome;
       }
       if (isAuthenticated && isAuthRoute) {
         return AppRoutes.home;
@@ -90,12 +93,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     },
     routes: [
       GoRoute(
+        path: AppRoutes.welcome,
+        builder: (_, __) => const WelcomeScreen(),
+      ),
+      GoRoute(
         path: AppRoutes.onboarding,
-        builder: (_, __) => const OnboardingScreen(),
+        builder: (_, __) => const WelcomeScreen(),
       ),
       GoRoute(
         path: AppRoutes.phoneEntry,
-        builder: (_, __) => const PhoneEntryScreen(),
+        builder: (_, state) => PhoneEntryScreen(
+          initialMode: state.extra as String?,
+        ),
       ),
       GoRoute(
         path: AppRoutes.otpVerification,
@@ -105,7 +114,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.profileSetup,
-        builder: (_, __) => const ProfileSetupScreen(),
+        builder: (_, __) => const AccountCreatedScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.accountCreated,
+        builder: (_, __) => const AccountCreatedScreen(),
       ),
       GoRoute(
         path: AppRoutes.signup,
@@ -114,6 +127,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.forgotPassword,
         builder: (_, __) => const ForgotPasswordScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.resetPassword,
+        builder: (_, state) => ResetPasswordScreen(
+          email: state.extra as String?,
+        ),
       ),
       GoRoute(
         path: AppRoutes.home,

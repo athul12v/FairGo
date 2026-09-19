@@ -6,9 +6,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:rider_app/core/providers/auth_provider.dart';
-import 'package:rider_app/core/theme/app_theme.dart';
-import 'package:rider_app/core/widgets/gradient_button.dart';
-import 'package:rider_app/core/widgets/fairgo_logo.dart';
 
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -69,21 +66,91 @@ class _ForgotPasswordScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, size: 20),
-          onPressed: () => context.pop(),
-          tooltip: 'Back',
-          color: AppColors.onBackground,
-        ),
-      ),
+      backgroundColor: Colors.white,
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          child: _emailSent ? _buildSuccessView() : _buildFormView(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header: Back Button + FairGO Logo
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back_rounded),
+                    color: const Color(0xFF191C1E),
+                    onPressed: () => context.pop(),
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 28,
+                        height: 28,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF0058BB),
+                          borderRadius: BorderRadius.circular(7),
+                        ),
+                        child: const Center(
+                          child: Text(
+                            'F',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w900,
+                              fontSize: 17,
+                              fontFamily: 'Inter',
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      RichText(
+                        text: const TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'Fair',
+                              style: TextStyle(
+                                color: Color(0xFF191C1E),
+                                fontSize: 20,
+                                fontWeight: FontWeight.w700,
+                                fontFamily: 'Inter',
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                            TextSpan(
+                              text: 'GO',
+                              style: TextStyle(
+                                color: Color(0xFF0058BB),
+                                fontSize: 20,
+                                fontWeight: FontWeight.w800,
+                                fontFamily: 'Inter',
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                            TextSpan(
+                              text: ' •',
+                              style: TextStyle(
+                                color: Color(0xFF1471E6),
+                                fontSize: 20,
+                                fontWeight: FontWeight.w900,
+                                fontFamily: 'Inter',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(width: 48),
+                ],
+              ),
+
+              const SizedBox(height: 24),
+
+              _emailSent ? _buildSuccessView() : _buildFormView(),
+            ],
+          ),
         ),
       ),
     );
@@ -95,103 +162,150 @@ class _ForgotPasswordScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const FairGoLogo()
-              .animate()
-              .fadeIn(duration: 400.ms)
-              .slideY(begin: -0.2, end: 0),
-          const SizedBox(height: 32),
-
-          Text(
-            'Reset your\npassword',
-            style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                  color: AppColors.onBackground,
-                  height: 1.15,
+          // Central Iconic Accent
+          Center(
+            child: Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: const Color(0xFFF2F4F6),
+                border: Border.all(
+                  color: const Color(0xFFD8E2FF).withOpacity(0.6),
+                  width: 6,
                 ),
+              ),
+              child: const Center(
+                child: Icon(
+                  Icons.lock_reset_rounded,
+                  color: Color(0xFF0058BB),
+                  size: 32,
+                ),
+              ),
+            ),
+          )
+              .animate()
+              .scale(duration: 400.ms, curve: Curves.easeOutBack)
+              .fadeIn(duration: 350.ms),
+
+          const SizedBox(height: 24),
+
+          // Title
+          const Center(
+            child: Text(
+              'Forgot password?',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Color(0xFF191C1E),
+                fontSize: 28,
+                fontWeight: FontWeight.w800,
+                fontFamily: 'Inter',
+                letterSpacing: -0.6,
+              ),
+            ),
           )
               .animate()
               .fadeIn(delay: 100.ms, duration: 400.ms)
-              .slideX(begin: -0.1, end: 0),
+              .slideY(begin: 0.05, end: 0),
 
           const SizedBox(height: 8),
 
-          Text(
-            'Enter the email associated with your account and we\'ll send a link to reset your password.',
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppColors.onSurfaceMuted,
-                  height: 1.4,
-                ),
-          ).animate().fadeIn(delay: 200.ms, duration: 400.ms),
+          const Center(
+            child: Text(
+              'Don\'t worry, it happens. Enter the email address associated with your FairGO account and we\'ll send you a password reset link.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Color(0xFF4C4546),
+                fontSize: 14.5,
+                fontFamily: 'Inter',
+                height: 1.45,
+              ),
+            ),
+          ).animate().fadeIn(delay: 150.ms, duration: 400.ms),
 
-          const SizedBox(height: 40),
+          const SizedBox(height: 32),
 
-          // Email Input
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Email Address',
-                style: TextStyle(
-                  color: AppColors.onBackground,
-                  fontWeight: FontWeight.w600,
+          // Email Input Field
+          const Text(
+            'FairGO Account Email',
+            style: TextStyle(
+              color: Color(0xFF191C1E),
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              fontFamily: 'Inter',
+            ),
+          ),
+          const SizedBox(height: 6),
+          Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8F9FB),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: const Color(0xFFE1E2E4)),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
+            child: TextFormField(
+              controller: _emailController,
+              keyboardType: TextInputType.emailAddress,
+              style: const TextStyle(
+                color: Color(0xFF191C1E),
+                fontFamily: 'Inter',
+                fontSize: 15,
+              ),
+              validator: (val) {
+                if (val == null || val.trim().isEmpty) {
+                  return 'Please enter your email';
+                }
+                if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                    .hasMatch(val.trim())) {
+                  return 'Enter a valid email address';
+                }
+                return null;
+              },
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                hintText: 'alex.chen@fairgo.city',
+                hintStyle: TextStyle(
+                  color: Color(0xFF7E7576),
                   fontSize: 14,
                   fontFamily: 'Inter',
                 ),
+                icon: Icon(Icons.email_outlined,
+                    color: Color(0xFF4C4546), size: 20),
               ),
-              const SizedBox(height: 6),
-              Container(
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceElevated,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: AppColors.surfaceBorder),
-                ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
-                child: TextFormField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  style: const TextStyle(
-                    color: AppColors.onBackground,
-                    fontFamily: 'Inter',
-                    fontSize: 16,
-                  ),
-                  validator: (val) {
-                    if (val == null || val.trim().isEmpty) {
-                      return 'Please enter your email';
-                    }
-                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                        .hasMatch(val.trim())) {
-                      return 'Enter a valid email address';
-                    }
-                    return null;
-                  },
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    hintText: 'name@example.com',
-                    hintStyle: TextStyle(
-                      color: AppColors.onSurfaceDisabled,
-                      fontSize: 14,
-                      fontFamily: 'Inter',
-                    ),
-                    icon: Icon(Icons.email_outlined,
-                        color: AppColors.onSurfaceMuted, size: 20),
-                  ),
+            ),
+          ),
+
+          const SizedBox(height: 10),
+
+          // Minimal Helper Text
+          Row(
+            children: const [
+              Icon(Icons.info_outline_rounded,
+                  size: 14, color: Color(0xFF0058BB)),
+              SizedBox(width: 6),
+              Text(
+                'Reset link expires 10 minutes after generation.',
+                style: TextStyle(
+                  color: Color(0xFF7E7576),
+                  fontSize: 12,
+                  fontFamily: 'Inter',
                 ),
               ),
             ],
-          ).animate().fadeIn(delay: 300.ms, duration: 400.ms),
+          ),
 
           if (_errorMessage != null) ...[
             const SizedBox(height: 12),
             Row(
               children: [
                 const Icon(Icons.error_outline,
-                    color: AppColors.error, size: 16),
+                    color: Color(0xFFEF4444), size: 16),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
                     _errorMessage!,
                     style: const TextStyle(
-                      color: AppColors.error,
+                      color: Color(0xFFEF4444),
                       fontSize: 13,
                       fontFamily: 'Inter',
                     ),
@@ -203,29 +317,82 @@ class _ForgotPasswordScreenState
 
           const SizedBox(height: 32),
 
-          GradientButton(
-            onPressed: _isLoading ? null : _handleResetPassword,
-            isLoading: _isLoading,
-            label: 'Send Reset Link',
-            gradient: AppColors.primaryGradient,
-          ).animate().fadeIn(delay: 400.ms, duration: 400.ms),
-
-          const Spacer(),
-
-          Center(
-            child: TextButton(
-              onPressed: () => context.pop(),
-              child: const Text(
-                'Back to Sign In',
-                style: TextStyle(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.w600,
-                  fontFamily: 'Inter',
-                  fontSize: 14,
-                ),
+          // Primary Black Button: Send Reset Link
+          Material(
+            color: Colors.black,
+            borderRadius: BorderRadius.circular(16),
+            elevation: 2,
+            shadowColor: Colors.black38,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onTap: _isLoading ? null : _handleResetPassword,
+              child: Container(
+                width: double.infinity,
+                height: 54,
+                alignment: Alignment.center,
+                child: _isLoading
+                    ? const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Text(
+                            'Send Reset Link',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 15.5,
+                              fontWeight: FontWeight.w700,
+                              fontFamily: 'Inter',
+                            ),
+                          ),
+                          SizedBox(width: 8),
+                          Icon(
+                            Icons.arrow_forward_rounded,
+                            color: Colors.white,
+                            size: 19,
+                          ),
+                        ],
+                      ),
               ),
             ),
-          ).animate().fadeIn(delay: 500.ms, duration: 400.ms),
+          ),
+
+          const SizedBox(height: 28),
+
+          // Back to Sign In Link
+          Center(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text(
+                  'Remembered your password? ',
+                  style: TextStyle(
+                    color: Color(0xFF7E7576),
+                    fontFamily: 'Inter',
+                    fontSize: 14,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () => context.pop(),
+                  child: const Text(
+                    'Back to Login',
+                    style: TextStyle(
+                      color: Color(0xFF0058BB),
+                      fontWeight: FontWeight.w700,
+                      fontFamily: 'Inter',
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -233,49 +400,76 @@ class _ForgotPasswordScreenState
 
   Widget _buildSuccessView() {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
+        const SizedBox(height: 20),
         Container(
           width: 80,
           height: 80,
           decoration: BoxDecoration(
-            color: AppColors.primary.withOpacity(0.12),
+            color: const Color(0xFFDCFCE7),
             shape: BoxShape.circle,
+            border: Border.all(
+              color: const Color(0xFF86EFAC).withOpacity(0.5),
+              width: 6,
+            ),
           ),
           child: const Icon(
             Icons.mark_email_read_outlined,
-            color: AppColors.primary,
+            color: Color(0xFF16A34A),
             size: 40,
           ),
         ).animate().scale(duration: 400.ms, curve: Curves.easeOutBack),
 
         const SizedBox(height: 24),
 
-        Text(
-          'Check your email',
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                color: AppColors.onBackground,
-                fontWeight: FontWeight.bold,
-              ),
+        const Text(
+          'Check your inbox',
+          style: TextStyle(
+            color: Color(0xFF191C1E),
+            fontSize: 26,
+            fontWeight: FontWeight.w800,
+            fontFamily: 'Inter',
+            letterSpacing: -0.5,
+          ),
         ).animate().fadeIn(delay: 100.ms, duration: 400.ms),
 
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
 
         Text(
           'We sent a password reset link to\n${_emailController.text.trim()}',
           textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: AppColors.onSurfaceMuted,
-                height: 1.4,
-              ),
+          style: const TextStyle(
+            color: Color(0xFF4C4546),
+            fontSize: 14.5,
+            fontFamily: 'Inter',
+            height: 1.45,
+          ),
         ).animate().fadeIn(delay: 200.ms, duration: 400.ms),
 
-        const SizedBox(height: 40),
+        const SizedBox(height: 36),
 
-        GradientButton(
-          onPressed: () => context.pop(),
-          label: 'Return to Sign In',
-          gradient: AppColors.primaryGradient,
+        Material(
+          color: Colors.black,
+          borderRadius: BorderRadius.circular(16),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: () => context.pop(),
+            child: Container(
+              width: double.infinity,
+              height: 54,
+              alignment: Alignment.center,
+              child: const Text(
+                'Return to Sign In',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 15.5,
+                  fontWeight: FontWeight.w700,
+                  fontFamily: 'Inter',
+                ),
+              ),
+            ),
+          ),
         ).animate().fadeIn(delay: 300.ms, duration: 400.ms),
       ],
     );

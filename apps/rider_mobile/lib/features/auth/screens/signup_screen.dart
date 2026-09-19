@@ -6,9 +6,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:rider_app/core/providers/auth_provider.dart';
-import 'package:rider_app/core/theme/app_theme.dart';
-import 'package:rider_app/core/widgets/gradient_button.dart';
-import 'package:rider_app/core/widgets/fairgo_logo.dart';
+import 'package:rider_app/core/router/app_router.dart';
 
 class SignupScreen extends ConsumerStatefulWidget {
   const SignupScreen({super.key});
@@ -40,6 +38,35 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     super.dispose();
   }
 
+  bool get _hasMinLength => _passwordController.text.length >= 8;
+  bool get _hasUpperCase =>
+      _passwordController.text.contains(RegExp(r'[A-Z]'));
+  bool get _hasDigitOrSpecial =>
+      _passwordController.text.contains(RegExp(r'[0-9!@#\$%^&*(),.?":{}|<>]'));
+
+  int get _strengthScore {
+    int score = 0;
+    if (_hasMinLength) score++;
+    if (_hasUpperCase) score++;
+    if (_hasDigitOrSpecial) score++;
+    return score;
+  }
+
+  String get _strengthLabel {
+    final score = _strengthScore;
+    if (score == 0) return '';
+    if (score == 1) return 'Weak';
+    if (score == 2) return 'Fair';
+    return 'Strong';
+  }
+
+  Color get _strengthColor {
+    final score = _strengthScore;
+    if (score <= 1) return const Color(0xFFEF4444);
+    if (score == 2) return const Color(0xFFF59E0B);
+    return const Color(0xFF10B981);
+  }
+
   Future<void> _handleSignup() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
@@ -60,9 +87,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
 
       if (mounted) {
         HapticFeedback.mediumImpact();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Account created successfully!')),
-        );
+        context.go(AppRoutes.accountCreated);
       }
     } catch (e) {
       if (mounted) {
@@ -70,7 +95,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         setState(() {
           _errorMessage = e.toString().contains('email-already-in-use')
               ? 'An account already exists with this email.'
-              : 'Failed to create account. Please check your details.';
+              : 'Failed to create account. Please verify details.';
         });
       }
     } finally {
@@ -81,73 +106,161 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, size: 20),
-          onPressed: () => context.pop(),
-          tooltip: 'Back',
-          color: AppColors.onBackground,
-        ),
-      ),
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const FairGoLogo()
-                    .animate()
-                    .fadeIn(duration: 400.ms)
-                    .slideY(begin: -0.2, end: 0),
-                const SizedBox(height: 24),
+                // Top Header: Back Button + FairGO Logo
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back_rounded),
+                      color: const Color(0xFF191C1E),
+                      onPressed: () => context.pop(),
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 28,
+                          height: 28,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF0058BB),
+                            borderRadius: BorderRadius.circular(7),
+                          ),
+                          child: const Center(
+                            child: Text(
+                              'F',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w900,
+                                fontSize: 17,
+                                fontFamily: 'Inter',
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        RichText(
+                          text: const TextSpan(
+                            children: [
+                              TextSpan(
+                                text: 'Fair',
+                                style: TextStyle(
+                                  color: Color(0xFF191C1E),
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w700,
+                                  fontFamily: 'Inter',
+                                  letterSpacing: -0.5,
+                                ),
+                              ),
+                              TextSpan(
+                                text: 'GO',
+                                style: TextStyle(
+                                  color: Color(0xFF0058BB),
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w800,
+                                  fontFamily: 'Inter',
+                                  letterSpacing: -0.5,
+                                ),
+                              ),
+                              TextSpan(
+                                text: ' •',
+                                style: TextStyle(
+                                  color: Color(0xFF1471E6),
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w900,
+                                  fontFamily: 'Inter',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(width: 48),
+                  ],
+                ),
 
-                Text(
-                  'Create your\naccount',
-                  style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                        color: AppColors.onBackground,
-                        height: 1.15,
-                      ),
+                const SizedBox(height: 20),
+
+                // Fast & Fair Mobility Pill Tag
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFD8E2FF),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Text(
+                    'Create Account',
+                    style: TextStyle(
+                      color: Color(0xFF001A41),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      fontFamily: 'Inter',
+                    ),
+                  ),
+                ).animate().fadeIn(duration: 300.ms),
+
+                const SizedBox(height: 12),
+
+                // Title
+                const Text(
+                  'Get started with\nFairGO',
+                  style: TextStyle(
+                    color: Color(0xFF191C1E),
+                    fontSize: 28,
+                    fontWeight: FontWeight.w800,
+                    fontFamily: 'Inter',
+                    height: 1.18,
+                    letterSpacing: -0.6,
+                  ),
                 )
                     .animate()
                     .fadeIn(delay: 100.ms, duration: 400.ms)
-                    .slideX(begin: -0.1, end: 0),
+                    .slideX(begin: -0.05, end: 0),
+
                 const SizedBox(height: 6),
 
-                Text(
-                  'Sign up with email to start booking rides',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: AppColors.onSurfaceMuted,
-                      ),
-                ).animate().fadeIn(delay: 200.ms, duration: 400.ms),
+                const Text(
+                  'Join thousands of riders enjoying honest, zero-surge travel.',
+                  style: TextStyle(
+                    color: Color(0xFF4C4546),
+                    fontSize: 14.5,
+                    fontFamily: 'Inter',
+                  ),
+                ).animate().fadeIn(delay: 150.ms, duration: 400.ms),
 
-                const SizedBox(height: 32),
+                const SizedBox(height: 28),
 
                 // Full Name
-                _buildTextField(
+                _buildField(
                   controller: _nameController,
                   label: 'Full Name',
-                  hint: 'John Doe',
-                  icon: Icons.person_outline,
+                  hint: 'Alex Chen',
+                  icon: Icons.person_outline_rounded,
                   validator: (val) {
                     if (val == null || val.trim().isEmpty) {
-                      return 'Please enter your full name';
+                      return 'Please enter your name';
                     }
                     return null;
                   },
-                ).animate().fadeIn(delay: 250.ms, duration: 300.ms),
+                ),
 
                 const SizedBox(height: 16),
 
-                // Email
-                _buildTextField(
+                // Email Address
+                _buildField(
                   controller: _emailController,
                   label: 'Email Address',
-                  hint: 'name@example.com',
+                  hint: 'alex.chen@fairgo.city',
                   icon: Icons.email_outlined,
                   keyboardType: TextInputType.emailAddress,
                   validator: (val) {
@@ -160,34 +273,35 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                     }
                     return null;
                   },
-                ).animate().fadeIn(delay: 300.ms, duration: 300.ms),
+                ),
 
                 const SizedBox(height: 16),
 
-                // Phone (Optional)
-                _buildTextField(
+                // Mobile Number
+                _buildField(
                   controller: _phoneController,
-                  label: 'Mobile Number (Optional)',
+                  label: 'Mobile Number',
                   hint: '98765 43210',
-                  icon: Icons.phone_android_outlined,
+                  icon: Icons.phone_iphone_rounded,
                   keyboardType: TextInputType.phone,
-                ).animate().fadeIn(delay: 350.ms, duration: 300.ms),
+                ),
 
                 const SizedBox(height: 16),
 
                 // Password
-                _buildTextField(
+                _buildField(
                   controller: _passwordController,
                   label: 'Password',
-                  hint: 'At least 6 characters',
-                  icon: Icons.lock_outline,
+                  hint: 'At least 8 characters',
+                  icon: Icons.lock_outline_rounded,
                   obscureText: _obscurePassword,
+                  onChanged: (_) => setState(() {}),
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscurePassword
                           ? Icons.visibility_off_outlined
                           : Icons.visibility_outlined,
-                      color: AppColors.onSurfaceMuted,
+                      color: const Color(0xFF4C4546),
                       size: 20,
                     ),
                     onPressed: () =>
@@ -197,28 +311,67 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                     if (val == null || val.isEmpty) {
                       return 'Please enter a password';
                     }
-                    if (val.length < 6) {
-                      return 'Password must be at least 6 characters';
+                    if (val.length < 8) {
+                      return 'Password must be at least 8 characters';
                     }
                     return null;
                   },
-                ).animate().fadeIn(delay: 400.ms, duration: 300.ms),
+                ),
+
+                // Clean Minimal Password Strength Feedback
+                if (_passwordController.text.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Row(
+                          children: List.generate(3, (index) {
+                            final filled = index < _strengthScore;
+                            return Expanded(
+                              child: Container(
+                                height: 4,
+                                margin: EdgeInsets.only(
+                                    right: index < 2 ? 6.0 : 0.0),
+                                decoration: BoxDecoration(
+                                  color: filled
+                                      ? _strengthColor
+                                      : const Color(0xFFE1E2E4),
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                              ),
+                            );
+                          }),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        _strengthLabel,
+                        style: TextStyle(
+                          color: _strengthColor,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          fontFamily: 'Inter',
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
 
                 const SizedBox(height: 16),
 
                 // Confirm Password
-                _buildTextField(
+                _buildField(
                   controller: _confirmPasswordController,
                   label: 'Confirm Password',
                   hint: 'Re-enter your password',
-                  icon: Icons.lock_outline,
+                  icon: Icons.replay_rounded,
                   obscureText: _obscureConfirmPassword,
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscureConfirmPassword
                           ? Icons.visibility_off_outlined
                           : Icons.visibility_outlined,
-                      color: AppColors.onSurfaceMuted,
+                      color: const Color(0xFF4C4546),
                       size: 20,
                     ),
                     onPressed: () => setState(() =>
@@ -230,48 +383,88 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                     }
                     return null;
                   },
-                ).animate().fadeIn(delay: 450.ms, duration: 300.ms),
+                ),
 
                 if (_errorMessage != null) ...[
                   const SizedBox(height: 12),
                   Row(
                     children: [
                       const Icon(Icons.error_outline,
-                          color: AppColors.error, size: 16),
+                          color: Color(0xFFEF4444), size: 16),
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
                           _errorMessage!,
                           style: const TextStyle(
-                            color: AppColors.error,
+                            color: Color(0xFFEF4444),
                             fontSize: 13,
                             fontFamily: 'Inter',
                           ),
                         ),
                       ),
                     ],
-                  ).animate().fadeIn(duration: 300.ms).shakeX(duration: 300.ms),
+                  ).animate().fadeIn(duration: 300.ms),
                 ],
 
                 const SizedBox(height: 28),
 
-                GradientButton(
-                  onPressed: _isLoading ? null : _handleSignup,
-                  isLoading: _isLoading,
-                  label: 'Create Account',
-                  gradient: AppColors.primaryGradient,
-                ).animate().fadeIn(delay: 500.ms, duration: 400.ms),
+                // Primary Black CTA: Create Account
+                Material(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.circular(16),
+                  elevation: 2,
+                  shadowColor: Colors.black38,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(16),
+                    onTap: _isLoading ? null : _handleSignup,
+                    child: Container(
+                      width: double.infinity,
+                      height: 54,
+                      alignment: Alignment.center,
+                      child: _isLoading
+                          ? const SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: const [
+                                Text(
+                                  'Create Account',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 15.5,
+                                    fontWeight: FontWeight.w700,
+                                    fontFamily: 'Inter',
+                                  ),
+                                ),
+                                SizedBox(width: 8),
+                                Icon(
+                                  Icons.arrow_forward_rounded,
+                                  color: Colors.white,
+                                  size: 19,
+                                ),
+                              ],
+                            ),
+                    ),
+                  ),
+                ),
 
                 const SizedBox(height: 24),
 
+                // Footer: Already have an account? Sign In
                 Center(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
+                      const Text(
                         'Already have an account? ',
                         style: TextStyle(
-                          color: AppColors.onSurfaceMuted,
+                          color: Color(0xFF7E7576),
                           fontFamily: 'Inter',
                           fontSize: 14,
                         ),
@@ -281,8 +474,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                         child: const Text(
                           'Sign In',
                           style: TextStyle(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF0058BB),
+                            fontWeight: FontWeight.w700,
                             fontFamily: 'Inter',
                             fontSize: 14,
                           ),
@@ -290,9 +483,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                       ),
                     ],
                   ),
-                ).animate().fadeIn(delay: 550.ms, duration: 400.ms),
+                ),
 
-                const SizedBox(height: 24),
+                const SizedBox(height: 20),
               ],
             ),
           ),
@@ -301,7 +494,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     );
   }
 
-  Widget _buildTextField({
+  Widget _buildField({
     required TextEditingController controller,
     required String label,
     required String hint,
@@ -309,6 +502,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     bool obscureText = false,
     Widget? suffixIcon,
     TextInputType? keyboardType,
+    void Function(String)? onChanged,
     String? Function(String?)? validator,
   }) {
     return Column(
@@ -317,7 +511,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         Text(
           label,
           style: const TextStyle(
-            color: AppColors.onBackground,
+            color: Color(0xFF191C1E),
             fontWeight: FontWeight.w600,
             fontSize: 14,
             fontFamily: 'Inter',
@@ -326,30 +520,31 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         const SizedBox(height: 6),
         Container(
           decoration: BoxDecoration(
-            color: AppColors.surfaceElevated,
+            color: const Color(0xFFF8F9FB),
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: AppColors.surfaceBorder),
+            border: Border.all(color: const Color(0xFFE1E2E4)),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
           child: TextFormField(
             controller: controller,
             obscureText: obscureText,
             keyboardType: keyboardType,
+            onChanged: onChanged,
             validator: validator,
             style: const TextStyle(
-              color: AppColors.onBackground,
+              color: Color(0xFF191C1E),
               fontFamily: 'Inter',
-              fontSize: 16,
+              fontSize: 15,
             ),
             decoration: InputDecoration(
               border: InputBorder.none,
               hintText: hint,
               hintStyle: const TextStyle(
-                color: AppColors.onSurfaceDisabled,
+                color: Color(0xFF7E7576),
                 fontSize: 14,
                 fontFamily: 'Inter',
               ),
-              icon: Icon(icon, color: AppColors.onSurfaceMuted, size: 20),
+              icon: Icon(icon, color: const Color(0xFF4C4546), size: 20),
               suffixIcon: suffixIcon,
             ),
           ),

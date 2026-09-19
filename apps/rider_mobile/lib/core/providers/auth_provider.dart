@@ -164,6 +164,20 @@ class AuthStateNotifier extends AsyncNotifier<AuthState> {
     ));
   }
 
+  Future<void> signInWithGoogle() async {
+    const uid = 'rider_dev_google_user';
+    final token = 'mock_google_jwt_${DateTime.now().millisecondsSinceEpoch}';
+    await _storage.write(key: AppConstants.keyAccessToken, value: token);
+    await _storage.write(key: AppConstants.keyUserId, value: uid);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(AppConstants.keyOnboardingDone, true);
+    state = AsyncData(state.requireValue.copyWith(
+      isAuthenticated: true,
+      isOnboarded: true,
+      userId: uid,
+    ));
+  }
+
   Future<void> sendPasswordReset({required String email}) async {
     try {
       await fb.FirebaseAuth.instance.sendPasswordResetEmail(email: email);

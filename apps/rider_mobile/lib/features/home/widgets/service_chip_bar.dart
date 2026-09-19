@@ -41,14 +41,14 @@ class _ServiceChipBarState extends State<ServiceChipBar> {
               duration: const Duration(milliseconds: 200),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               decoration: BoxDecoration(
-                color: isSelected ? AppColors.primary : AppColors.surface.withOpacity(0.9),
+                color: isSelected ? AppColors.primary : AppColors.surface.withValues(alpha: 0.9),
                 borderRadius: BorderRadius.circular(22),
                 border: Border.all(
                   color: isSelected ? AppColors.primary : AppColors.surfaceBorder,
                   width: 1,
                 ),
                 boxShadow: isSelected
-                    ? [BoxShadow(color: AppColors.primary.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 2))]
+                    ? [BoxShadow(color: AppColors.primary.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 2))]
                     : null,
               ),
               child: Row(
