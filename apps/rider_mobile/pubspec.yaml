@@ -72,6 +72,7 @@ dependencies:
 
   # Auth & Security
   local_auth: ^2.3.0
+  firebase_auth: ^5.3.4
 
   # Analytics / Crash
   firebase_analytics: ^11.4.0

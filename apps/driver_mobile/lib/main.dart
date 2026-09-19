@@ -34,7 +34,11 @@ void main() async {
     statusBarIconBrightness: Brightness.light,
   ));
 
-  await Firebase.initializeApp();
+  try {
+    await Firebase.initializeApp();
+  } catch (e) {
+    debugPrint('Info: Firebase initialization skipped: $e');
+  }
   await DeviceIdService.ensureDeviceId();
 
   runApp(const ProviderScope(child: FairGoDriverApp()));

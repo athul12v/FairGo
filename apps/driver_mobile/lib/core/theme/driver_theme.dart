@@ -105,7 +105,7 @@ class DriverTheme {
           textStyle: const TextStyle(fontFamily: 'Inter', fontSize: 16, fontWeight: FontWeight.w600),
         ),
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: DriverColors.surface,
         elevation: 0,
         shape: RoundedRectangleBorder(

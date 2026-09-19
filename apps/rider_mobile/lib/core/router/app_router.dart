@@ -8,6 +8,8 @@ import 'package:rider_app/features/onboarding/screens/onboarding_screen.dart';
 import 'package:rider_app/features/auth/screens/phone_entry_screen.dart';
 import 'package:rider_app/features/auth/screens/otp_verification_screen.dart';
 import 'package:rider_app/features/auth/screens/profile_setup_screen.dart';
+import 'package:rider_app/features/auth/screens/signup_screen.dart';
+import 'package:rider_app/features/auth/screens/forgot_password_screen.dart';
 import 'package:rider_app/features/home/screens/home_screen.dart';
 import 'package:rider_app/features/booking/screens/service_selection_screen.dart';
 import 'package:rider_app/features/booking/screens/location_picker_screen.dart';
@@ -37,6 +39,8 @@ class AppRoutes {
   static const phoneEntry = '/auth/phone';
   static const otpVerification = '/auth/otp';
   static const profileSetup = '/auth/profile';
+  static const signup = '/auth/signup';
+  static const forgotPassword = '/auth/forgot-password';
   static const home = '/';
   static const serviceSelection = '/booking/select-service';
   static const locationPicker = '/booking/location';
@@ -102,6 +106,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.profileSetup,
         builder: (_, __) => const ProfileSetupScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.signup,
+        builder: (_, __) => const SignupScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.forgotPassword,
+        builder: (_, __) => const ForgotPasswordScreen(),
       ),
       GoRoute(
         path: AppRoutes.home,
