@@ -8,7 +8,7 @@ plugins {
 android {
     namespace = "in.fairgo.rider_app"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "30"
 
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
