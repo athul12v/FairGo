@@ -22,7 +22,7 @@ subprojects {
 subprojects {
     plugins.withId("com.android.library") {
         configure<com.android.build.gradle.LibraryExtension> {
-            compileSdk = 35
+            compileSdk = 36
         }
     }
 }
