@@ -8,7 +8,7 @@ class RideCategoryItem {
   final String title;
   final String badge;
   final String eta;
-  final String icon;
+  final IconData iconData;
   final Color badgeColor;
 
   const RideCategoryItem({
@@ -16,7 +16,7 @@ class RideCategoryItem {
     required this.title,
     required this.badge,
     required this.eta,
-    required this.icon,
+    required this.iconData,
     required this.badgeColor,
   });
 }
@@ -39,7 +39,7 @@ class RideCategorySelector extends StatelessWidget {
       title: 'Daily Ride',
       badge: 'Fixed Rate',
       eta: '3m away',
-      icon: '🚗',
+      iconData: Icons.directions_car_rounded,
       badgeColor: Color(0xFF0058BB),
     ),
     RideCategoryItem(
@@ -47,7 +47,7 @@ class RideCategorySelector extends StatelessWidget {
       title: 'Auto',
       badge: 'Affordable',
       eta: '1m away',
-      icon: '🛺',
+      iconData: Icons.electric_rickshaw_rounded,
       badgeColor: Color(0xFF059669),
     ),
     RideCategoryItem(
@@ -55,7 +55,7 @@ class RideCategorySelector extends StatelessWidget {
       title: 'Moto',
       badge: 'Fastest',
       eta: '2m away',
-      icon: '🏍️',
+      iconData: Icons.two_wheeler_rounded,
       badgeColor: Color(0xFFD97706),
     ),
   ];
@@ -145,9 +145,22 @@ class RideCategorySelector extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              cat.icon,
-                              style: const TextStyle(fontSize: 26),
+                            Container(
+                              width: 38,
+                              height: 38,
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? const Color(0xFF0058BB).withValues(alpha: 0.1)
+                                    : const Color(0xFFF2F4F6),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Icon(
+                                cat.iconData,
+                                size: 22,
+                                color: isSelected
+                                    ? const Color(0xFF0058BB)
+                                    : const Color(0xFF191C1E),
+                              ),
                             ),
                             Container(
                               padding: const EdgeInsets.symmetric(
